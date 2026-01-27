@@ -24,7 +24,6 @@ class TestcontainersConfiguration {
                 .asCompatibleSubstituteFor("postgres"))
                 .withDatabaseName(databaseName)
                 .withUsername(username)
-                .withPassword(password)
-                .withInitScript("init-pgroonga.sql"); // pqroonga EXTENSION 추가
+                .withPassword(password);
     }
 }

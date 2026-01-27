@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -14,10 +16,25 @@ import java.util.List;
 public class BaseInitData implements ApplicationRunner {
     @Autowired
     private FaqRepository faqRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
+        initPgroonga();
+        initData();
+    }
+
+    private void initPgroonga() {
+        try {
+            jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS pgroonga");
+        } catch (Exception e) {
+            System.err.println("PGoonga 화장 설치 실패" +  e.getMessage());
+        }
+    }
+
+    private void initData() {
         if (faqRepository.count() > 0) return;
 
         List<Faq> faqs = List.of(
@@ -37,4 +54,5 @@ public class BaseInitData implements ApplicationRunner {
 
         faqRepository.saveAll(faqs);
     }
+
 }
