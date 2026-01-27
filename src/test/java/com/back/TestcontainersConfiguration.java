@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-public class TestcontainersConfiguration {
-    @Value("${DATABASE_USERNAME:faq}")
+class TestcontainersConfiguration {
+    @Value("${DATABSE_USERNAME:faq}")
     private String username;
     @Value("${DATABASE_PASSWORD:faq123}")
     private String password;
@@ -20,14 +19,12 @@ public class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgresContainer() {
-        return new PostgreSQLContainer(DockerImageName.parse("groonga/pgroonga:latest-alpine-18-slim"))
+        return new PostgreSQLContainer(DockerImageName
+                .parse("groonga/pgroonga:latest-alpine-18-slim")
+                .asCompatibleSubstituteFor("postgres"))
+                .withDatabaseName(databaseName)
                 .withUsername(username)
                 .withPassword(password)
-                .withDatabaseName(databaseName);
-    }
-    @Bean
-    @ServiceConnection
-    PostgreSQLContainer postgreSQLContainer() {
-        return new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
+                .withInitScript("init-pgroonga.sql"); // pqroonga EXTENSION 추가
     }
 }
