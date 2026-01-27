@@ -1,5 +1,6 @@
 package com.back;
 
+import com.back.ai.service.ChatService;
 import com.back.faq.entity.Faq;
 import com.back.faq.repository.FaqRepository;
 import com.back.faq.service.FaqService;
@@ -10,24 +11,30 @@ import org.springframework.boot.data.jpa.test.autoconfigure.AutoConfigureDataJpa
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureWebTestClient
-@AutoConfigureDataJpa
+@AutoConfigureWebTestClient(timeout = "120s")
 class ChatBotAiApplicationTests {
     @Autowired
     private FaqRepository faqRepository;
 
     @Autowired
     private FaqService faqService;
+
+    @Autowired
+    private ChatService chatService;
+
+    @Autowired
+    private WebTestClient webTestClient;
 
     @Test
     @DisplayName("FAQ 전문 검색 테스트")
@@ -46,4 +53,43 @@ class ChatBotAiApplicationTests {
         results.forEach(System.out::println);
     }
 
+    @Test
+    @DisplayName("FAQ 기반 AI 챗봇 테스트")
+    void t2(){
+        // given
+        String userMessage = "배송은 얼마나 걸려요?";
+
+        // when & then
+        String response = chatService.streamChatResponse(userMessage)
+                .collectList()
+                .map(list -> String.join("", list))
+                .block();
+
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        System.out.println("AI 응답: " + response);
+    }
+
+    @Test
+    @DisplayName("SSE 스트리밍 API 테스트")
+    void t3(){
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/v1/ai/chat")
+                        .queryParam("message", "환불 방법을 알려주세요")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class)
+                .getResponseBody()
+                .collectList()
+                .map(list -> String.join("", list))
+                .doOnNext(response -> {
+                    assertNotNull(response);
+                    assertFalse(response.isEmpty());
+                    System.out.println("SSE 응답: " + response);
+                })
+                .block();
+    }
 }
