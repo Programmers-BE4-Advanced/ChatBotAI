@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 @RestController
-@RequestMapping("/api/v1/ai")
+@RequestMapping("/api/v1/ai/chat")
 public class AiController {
     @Autowired
     private ChatService chatService;
 
-    @GetMapping("/chat")
+    @GetMapping
     public Flux<String> chat(@RequestParam("message") String message) {
         return chatService.streamChatResponse(message);
     }

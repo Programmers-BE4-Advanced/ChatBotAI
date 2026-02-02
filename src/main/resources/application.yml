@@ -3,11 +3,16 @@ spring:
     name: ChatBotAI
   config:
     import: optional:file:.env[.properties]
-  datasource:
-    url: jdbc:postgresql://localhost:5432/${DATABASE_NAME:faqdb}
-    username: ${DATABASE_USERNAME:faq}
-    password: ${DATABASE_PASSWORD:faq123}
-    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/${DATABASE_NAME:faqdb}
+#    username: ${DATABASE_USERNAME:faq}
+#    password: ${DATABASE_PASSWORD:faq123}
+#    driver-class-name: org.postgresql.Driver
+  spring:
+    r2dbc:
+      url: r2dbc:postgresql://localhost:5432/${DATABASE_NAME:faqdb}
+      username: ${DATABASE_USERNAME:faq}
+      password: ${DATABASE_PASSWORD:faq123}
   jpa:
     hibernate:
       ddl-auto: update

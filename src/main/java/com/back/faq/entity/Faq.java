@@ -1,24 +1,25 @@
 package com.back.faq.entity;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
+@Table("faq")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Faq {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column("question")
     private String question;
 
-    @Column(columnDefinition = "TEXT")
+    @Column("answer")
     private String answer;
 }
